@@ -1,0 +1,17 @@
+#define BASIC 257
+#define CONST 258
+#define ID 259
+#define IF 260
+#define ELSE 261
+#define WHILE 262
+#define DO 263
+#define BREAK 264
+#define RELOP_LT 265
+#define RELOP_LE 266
+#define RELOP_GT 267
+#define RELOP_GE 268
+#define RELOP_EQ 269
+#define RELOP_NEQ 270
+#define OR 271
+#define AND 272
+#define UMINUS 273

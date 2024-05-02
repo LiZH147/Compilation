@@ -1,0 +1,1597 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+
+  <html xmlns="http://www.w3.org/1999/xhtml" lang="zh-CN" xml:lang="zh-CN">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+<title>Yacc 与 Lex 快速入门</title>
+<meta http-equiv="PICS-Label" content='(PICS-1.1 "http://www.icra.org/ratingsv02.html" l gen true r (cz 1 lz 1 nz 1 oz 1 vz 1) "http://www.rsac.org/ratingsv01.html" l gen true r (n 0 s 0 v 0 l 0) "http://www.classify.org/safesurf/" l gen true r (SS~~000 1))'/>
+<link rel="schema.DC" href="http://purl.org/DC/elements/1.0/"/>
+<link rel="SHORTCUT ICON" href="http://www.ibm.com/favicon.ico"/>
+  <meta name="Owner" content="dw@cn.ibm.com"/>
+  <meta name="DC.Language" scheme="rfc1766" content="zh-CN"/>
+  <meta name="IBM.Country" content="CN"/>
+<meta name="Security" content="Public"/>
+<meta name="IBM.SpecialPurpose" content="SP001"/>
+<meta name="IBM.PageAttributes" content="sid=1003,1004"/>
+<meta name="Source" content="v16 Template Generator"/>
+<meta name="Robots" content="index,follow"/>
+<meta name="Abstract" content="Lex 和 Yacc 是 UNIX 两个非常重要的、功能强大的工具。事实上，如果你熟练掌握 Lex 和 Yacc 的话，它们的强大功能使创建 FORTRAN 和 C 的编译器如同儿戏。Ashish Bansal 为您详细的讨论了编写自己的语言和编译器所用到的这两种工具，包括常规表达式、声明、匹配模式、变量、Yacc 语法和解析器代码。最后，他解释了怎样把 Lex 和 Yacc 结合起来。"/>
+<meta name="Description" content="Lex 和 Yacc 是 UNIX 两个非常重要的、功能强大的工具。事实上，如果你熟练掌握 Lex 和 Yacc 的话，它们的强大功能使创建 FORTRAN 和 C 的编译器如同儿戏。Ashish Bansal 为您详细的讨论了编写自己的语言和编译器所用到的这两种工具，包括常规表达式、声明、匹配模式、变量、Yacc 语法和解析器代码。最后，他解释了怎样把 Lex 和 Yacc 结合起来。"/>
+<meta name="Keywords" content="linux, linux tutorials, linux training, linux standards,linux code, linux resources, linux programming, open source standards, linux how to, IBM, linux tips, linux 教程, linux 培训,Linux 文章, Linux 论文, linux 标准, Linux 白皮书 linux 代码, linux 参考资料, linux 编程, 开放源码标准, linux 使用指南, 实用技巧,lex, yacc, lex 介绍, yacc 介绍, unix 工具, 编译器, FORTRAN 编译器, C 编译器, 编译工具，常规表达式, 声明, 匹配模式, 变量, yacc 语法, 解析器, 解析器代码, 词法分析器 ,, tttlca"/>
+<meta name="DC.Date" scheme="iso8601" content="2000-11-01"/>
+<meta name="DC.Type" scheme="IBM_ContentClassTaxonomy" content="CT316"/>
+<meta name="DC.Subject" scheme="IBM_SubjectTaxonomy" content="SWGC0"/>
+<meta scheme="IBM_WTMCategory" name="IBM.WTMCategory" content="SOFDCLNXCN" />
+<meta name="DC.Rights" content="© Copyright IBM Corporation 2000"/>
+<meta name="IBM.Effective" scheme="W3CDTF" content="2000-11-01"/>
+<meta name="title" content="Yacc 与 Lex 快速入门"/>
+
+<!-- HEADER_SCRIPTS_AND_CSS_INCLUDE -->
+<link href="//dw1.s81c.com/common/v16/css/all.css" media="all" rel="stylesheet" title="www" type="text/css"/>
+<link href="//dw1.s81c.com/common/v16/css/screen.css" media="screen,projection" rel="stylesheet" title="www" type="text/css"/>
+<link href="//dw1.s81c.com/common/v16/css/screen-uas.css" media="screen,projection" rel="stylesheet" title="www" type="text/css"/>
+<link href="//dw1.s81c.com/common/v16/css/cn/zh/screen-fonts.css" media="screen,projection" rel="stylesheet" title="www" type="text/css"/>
+<link href="//dw1.s81c.com/common/v16/css/handheld.css" media="handheld" rel="stylesheet" title="www" type="text/css"/>
+<link href="//dw1.s81c.com/common/v16/css/print.css" media="print" rel="stylesheet" title="www" type="text/css"/>
+<link href="//dw1.s81c.com/common/v16/css/overlay.css" media="screen,projection" rel="stylesheet" title="www" type="text/css"/>
+
+<!-- dW-specific CSS -->
+<link href="//dw1.s81c.com/developerworks/css/dw-screen.css" media="screen,projection" rel="stylesheet" title="www" type="text/css"/>
+<link href="//dw1.s81c.com/developerworks/css/dw-local-site.css" media="screen,projection" rel="stylesheet" title="www" type="text/css"/>
+<link href="//dw1.s81c.com/developerworks/css/dw-screen-comments-ratings-signin.css" media="screen,projection" rel="stylesheet" title="www" type="text/css"/>
+<link href="//dw1.s81c.com/developerworks/js/jquery/cluetip98/jquery.cluetip.css" media="screen,projection" rel="stylesheet"  title="www" type="text/css" />
+
+<!-- JPP: LOCAL URL FOR TESTING V16 DEFIANT MASTHEAD/FOOTER -->
+<link href="//dw1.s81c.com/developerworks/css/dw-mf/dw-mf2012-01.css" rel="stylesheet" title="www" type="text/css"/>
+<link href="//dw1.s81c.com/developerworks/css/dw-mf/dw-mf-cn.css" rel="stylesheet" title="www" type="text/css"/>
+<script src="//dw1.s81c.com/common/js/ibmcommon.js" type="text/javascript">//</script>
+<script src="//dw1.s81c.com/common/js/dynamicnav.js" type="text/javascript">//</script>
+<script language="JavaScript" src="//dw1.s81c.com/developerworks/js/urltactic.js" type="text/javascript"></script>
+<!-- Rating_START -->
+<script language="JavaScript" type="text/javascript">
+  // <![CDATA[
+
+ dwr = {};
+  dwr.clickhere = '点击评分';
+  dwr.starIntro = ''; 
+  dwr.stars = '星';
+  dwr.star = '星'; 
+  dwr.avgRatingOf = '平均分';
+  dwr.youRated = '您的评分是';
+  dwr.avgRating = '平均分';
+  dwr.basedOnVote = '共 {1} 个评分'; // {1} to be substitue by code
+  dwr.basedOnVotes = '共 {1} 个评分';
+  dwr.leftParen = '（'; 
+  dwr.rightParen = ' ）'; 
+  dwr.space = ' '; 
+  dwr.yourRating = '您的评分';
+dwr.avgRating2 = '总共 {1} 评分的平均分';
+dwr.avgRating3 = '平均分{1} 星';
+dwr.rateThisArticle = '为本文评分';
+dwr.votes = '{1}个评分';
+dwr.vote = '{1}个评分';
+dwr.submitErr = '错误：提交失败，请重试。';
+dwr.noRatingErr = '错误：请选择一个评分并重新提交。';
+dwr.submit = '提交';
+// ]]>
+</script>
+
+<!-- Rating_START -->
+<script language="JavaScript" src="//dw1.s81c.com/developerworks/js/artrating/showrating.js" type="text/javascript"></script>
+<style type="text/css">
+  .metavalue {
+  display: none;
+  }
+</style>
+<!-- Rating_END --><!-- RESERVED_HEADER_INCLUDE -->
+<script language="javascript" src="//dw1.s81c.com/developerworks/js/ajax1.js" type="text/javascript"></script>
+<script language="javascript" src="//dw1.s81c.com/developerworks/js/search_counter-maverick.js" type="text/javascript"></script>
+<script language="javascript" src="//dw1.s81c.com/developerworks/js/request_referer_capture-maverick.js" type="text/javascript"></script>
+<script language="JavaScript" type="text/javascript">
+ <!--
+ setDefaultQuery('defaultHere');
+ //-->
+</script>
+<script language="JavaScript" type="text/javascript">
+ <!--
+ function openNewWindow(url,tar,arg){window.open(url,tar,arg);}
+ //-->
+</script>
+  <!-- Include file support -->
+  <script language="JavaScript" type="text/javascript">
+    (function($) {
+    jQuery.extend({
+    getInc: function(u,d){
+    if(u==null)return;
+    jQuery.ajax({
+    type: "GET",
+    url: u,
+    dataType: "text",
+    success: function(t) {
+    jQuery(d).html(t);
+    ibmCommon.initShowHide(jQuery(d).children()[0]);	
+    },
+    async: true
+    });
+    }
+    });
+    })(jQuery);
+  </script>
+</head>
+
+<body id="ibm-com">
+<div id="ibm-top" class="ibm-landing-page">
+
+<!-- MASTHEAD_BEGIN -->
+<!-- MASTHEAD_BEGIN -->
+<div class="ibm-access"><a href="#ibm-content">跳转到主要内容</a></div>
+<div id="ibm-masthead-dw">
+  
+    <!-- TOP ROW -->    
+    <div id="dw-masthead-top-row">
+    	<ul id="ibm-mast-options-dw" class="cn">
+    		<li id="dw-mast-top-0"> 	
+    			<a class="dw-mf-noscript" href="#" title="登录（或注册）需启用 JavaScript">登录 (或注册)</a>
+    		</li>
+    		<li id="dw-mast-top-1" class="dw-mast-top-1-cn">
+    			<a href="#SELECTLANG">中文</a><img class="dw-preload" src="//dw1.s81c.com/developerworks/i/mf/arrow-down-active.gif" width="8" height="7" alt="" />
+    		</li>
+    		<li id="dw-mast-top-2" class="dw-mf-hide">
+    			<a href="#"><img src="/developerworks/mydeveloperworks/profiles/photo.do?userid=[uid]" alt="PHOTO" class="dw-mast-profimg" width="20" height="20"/> [userid]</a>
+    		</li>
+    		<li id="dw-mast-top-3">
+    			<a href="#"><img src="//dw1.s81c.com/developerworks/i/mf/ibm-smlogo.gif" width="44" height="16" alt="IBM®" /></a>
+    		</li>
+    	</ul>
+	</div>
+    
+    <!-- TOP ROW SLIDER -->
+    <div id="ibm-my-menu-dw">    
+        <div class="ibm-ribbon-pane-dw">
+            <div class="ibm-ribbon-section-dw">
+                <!-- Sign-in -->
+                <div class="dw-mast-columns">                
+					<div class="dw-mast-col-1-1">
+						<div id="dw-mast-sso">
+							<!--<div id="dw-mast-sso-reg">
+								<p class="dw-mast-sso-reg-cn">如果您还没有注册到 IBM 注册系统，我们为给您带来的不便表示道歉，并请您马上注册。 							
+									<a href="#" onclick="(function () {window.location='/developerworks/dwwi/DWAuthRouter?m=reg&amp;lang=zh&amp;d='+encodeURIComponent(location.href);})();">现在注册</a>。</p>
+							</div>-->
+							<div id="signin_error_mf" class="dw-mf-hide"></div>
+							<div id="dw-mast-sso-form">
+								<form id="sForm_mf" action="" method="post" name="sForm_name_mf" onsubmit="return false;">
+									<div id="dw-mast-sso-id" class="dw-mast-sso-id-cn">
+										<label for="ibmid_mf">IBM ID：</label>
+										<input id="ibmid_mf" type="text" value="" name="ibmid_name_mf" maxlength="100" onkeypress="handleEP(event,this.form,'mf');"/>
+									</div>
+									<div id="dw-mast-sso-pw" class="dw-mast-sso-pw-cn">
+										<label for="pw_mf">密码：</label>
+										<input id="pw_mf" type="password" value="" name="pw_name_mf" maxlength="100" onkeypress="handleEP(event,this.form,'mf');"/>
+									</div>
+									<div id="dw-mast-sso-target" class="dw-mast-sso-target-cn">
+										<p class="dw-mf-perm-box">
+											<input id="perm_mf" type="checkbox" name="perm_name_mf"/><label for="perm_mf"> 保持登录。</label>
+										</p>
+									</div>
+									<div id="dw-mast-sso-terms">
+										<p class="dw-mast-sso-terms-cn">单击提交则表示您同意developerWorks 的条款和条件。 <a href="/developerworks/mydeveloperworks/terms?lang=zh">查看条款和条件</a>.</p>
+									</div>
+									<div>
+										<input class="dw-mf-submit-btn-cn" name="ibm_submit_name_mf" value="提交" onclick="signin('mf');return false;" type="submit" />
+									</div>
+								</form>
+							</div>
+							<div id="dw-mast-sso-update">
+								<div id="dw-mast-sso-update-id">
+									<ul>
+										<li><a class="ibm-forward-link" href="#" onclick="(function () {window.location='/developerworks/dwwi/DWAuthRouter?m=reg&amp;lang=zh_CN&amp;d='+encodeURIComponent(location.href);})();">需要一个 IBM ID？</a></li>
+										
+									<li><a class="ibm-forward-link" href="/developerworks/dwwi/jsp/WSHelp.jsp?lang=zh_CN">忘记 IBM ID？</a></li>
+									</ul>
+								</div>
+								<div id="dw-mast-sso-update-pw">
+								<ul class="dw-mf-pwupdate">
+									<li><a class="ibm-forward-link" href="#" onclick="(function () {window.location='https://www.ibm.com/account/profile?page=forgot&amp;lang=zh_CN&amp;appname=ibm&amp;required=null&amp;d='+encodeURIComponent(getAuthUrl())+'%3Fm%3Dloginpage%26lang%3Dzh_CN%26d%3D'+encodeURIComponent(location.href);})();">忘记密码？</a></li>
+									<li><a class="ibm-forward-link" href="#" onclick="(function () {window.location='https://www.ibm.com/account/profile?page=chpw&amp;lang=zh_CN&amp;appname=ibm&amp;required=null&amp;d='+encodeURIComponent(location.href);})();">更改您的密码</a></li>
+								</ul>
+									</div>
+							</div>
+							<div id="dw-mast-sso-text">
+								<p>当您初次登录到 developerWorks 时，将会为您创建一份概要信息。<strong>您在 developerWorks 概要信息中选择公开的信息将公开显示给其他人，但您可以随时修改这些信息的显示状态。</strong>您的姓名（除非选择隐藏）和昵称将和您在 developerWorks 发布的内容一同显示。</p>
+								<p class="dw-mf-secure-cn">所有提交的信息确保安全。</p>
+							</div>
+							<div class="dw-mast-close">
+								<ul>
+									<li><div class="dw-mast-close-sign-cn"><a href="#"><img src="//dw1.s81c.com/i/c.gif" alt="关闭 [x]" width="20" height="10" border="0"/></a></div></li>
+								</ul>
+							</div>	
+						</div>
+						
+						<div id="dw-mast-dname" class="dw-mf-hide">
+							<p>当您初次登录到 developerWorks 时，将会为您创建一份概要信息，您需要指定一个昵称。您的昵称将和您在 developerWorks 发布的内容显示在一起。</p><p><strong>昵称长度在 3 至 31 个字符之间</strong>。 您的昵称在 developerWorks 社区中必须是唯一的，并且出于隐私保护的原因，不能是您的电子邮件地址。</p>
+							<div id="signin_dname_error_mf" class="dw-mf-hide"></div>
+							<div id="dw-mast-dname-form">
+								<form id="dForm_mf" action="" method="post" name="dForm_name_mf" onsubmit="return false;">
+									<div id="dw-mast-dname-mf">
+										<label for="dname_mf">昵称：</label>
+										<input id="dname_mf" name="dname_name_mf" maxlength="31" size="25" value="" type="text" onkeypress="handleEP(event,this.form,'mf');" />
+									</div>
+									<div id="dw-mast-dname-terms">
+										<p class="dw-mast-dname-terms-cn">单击<strong>提交</strong>则表示您同意developerWorks 的条款和条件。 <a href="/developerworks/mydeveloperworks/terms?lang=zh">查看条款和条件</a>.</p>
+									</div>
+									<div>
+										<input class="dw-mf-submit-btn-cn" name="dname_submit_name_mf" value="提交" onclick="signin('mf');return false;" type="submit" />
+									</div>
+								</form>								
+							</div>
+							<div id="dw-mast-dname-secure">
+								<p class="dw-mf-secure-cn">所有提交的信息确保安全。</p>
+							</div>
+							<div class="dw-mast-close">
+								<ul>
+									<li><div class="dw-mast-close-sign-cn"><a href="#"><img src="//dw1.s81c.com/i/c.gif" alt="关闭 [x]" width="20" height="10" border="0"/></a></div></li>
+								</ul>
+							</div>	
+						</div>
+	
+						<div id="dw-mast-auth" class="dw-mf-hide">
+							<div>
+
+								<h2>My developerWorks:</h2>
+								<ul>
+									<li><a id="dw-mast-top-0-0" href="/developerworks/mydeveloperworks/profiles/html/myProfileView.do?lang=zh">我的概要信息</a></li>
+									<li><a href="/developerworks/mydeveloperworks/homepage?lang=zh">我的首页</a></li>
+									<li><a href="/developerworks/mydeveloperworks/groups/service/html/mycommunities?lang=zh">我的群组</a></li>
+								</ul>     
+							</div>
+							<div id="dw-mast-notify" class="dw-mf-hide">
+								<h2>我的通知：</h2>
+								<ul>
+									<li><a id="new_notify" href="/developerworks/mydeveloperworks/homepage?lang=zh">{[num_notify] 个新通知}([num_notify] 个新通知)</a></li>
+									<li><a id="new_invite" href="/developerworks/mydeveloperworks/profiles/html/wc.do?action=in&requireAuth=true&widgetId=friends&lang=[lang]">{[num_invite] 个网络请求}([num_invite] 个网络请求)</a></li>  
+								</ul>
+							</div>
+							<div class="dw-mast-more">
+								<ul class="ibm-link-list">
+									<li><a class="dw-more-link" href="#" onclick="signOut(); return false;"><strong>退出</strong></a></li>
+								</ul>
+							</div>
+							<div class="dw-mast-close">
+								<ul>
+									<li><div class="dw-mast-close-sign"><a href="#"><img src="//dw1.s81c.com/i/c.gif" alt="关闭 [x]" width="20" height="10" border="0"/></a></div></li>
+								</ul>
+							</div>		
+						</div>
+						
+					</div>
+                	
+                </div>
+                <!-- Site selector --> 
+				<div class="dw-mast-columns">
+					<div class="dw-mast-col-2-1">
+						<h2>选择语言：</h2>
+						<ul>
+							<li><a id="dw-mast-top-1-0" href="http://www.ibm.com/developerworks/">English</a></li>
+							<li><a href="http://www.ibm.com/developerworks/cn/">中文</a></li>
+							<li><a href="http://www.ibm.com/developerworks/jp/">日本語</a></li>
+							<li><a href="http://www.ibm.com/developerworks/kr/">한국어</a></li>
+						</ul>
+					</div>
+					<div class="dw-mast-col-2-2">
+						<ul>
+							<li><a href="http://www.ibm.com/developerworks/ru/">Русский</a></li>
+							<li><a href="http://www.ibm.com/developerworks/br/">Português (Brasil)</a></li>
+							<li><a href="http://www.ibm.com/developerworks/ssa/">Español</a></li>
+							<li><a href="http://www.ibm.com/developerworks/vn/">Việt</a></li>
+						</ul>
+					</div>
+					<div class="dw-mast-close">
+						<ul>
+							<li><div class="dw-mast-close-lang"><a href="#"><img src="//dw1.s81c.com/i/c.gif" alt="关闭 [x]" width="20" height="10" border="0"/></a></div></li>
+						</ul>
+                    </div>
+                </div>
+                <div class="dw-mast-columns"><!-- Authenticated --></div>
+                <!-- IBM -->
+				<div class="dw-mast-columns">
+					<div class="dw-mast-col-2-1">
+						<ul>
+							<li><a id="dw-mast-top-3-0" href="http://www.ibm.com/cn/zh/">IBM 主页</a></li>
+							<li><a href="http://www.ibm.com/solutions/cn/zh/">解决方案</a></li>
+							<li><a href="http://www.ibm.com/software/cn/">软件</a></li>
+						</ul>
+					</div>
+					<div class="dw-mast-col-2-2 dw-mast-ibm">
+						<ul>
+							<li><a href="http://www.ibm.com/support/cn/zh/">支持门户</a></li>
+							<li><a href="http://www.ibm.com/support/documentation/cn/zh/">产品文档</a></li>
+							<li><a href="http://www.ibm.com/redbooks/">Redbooks（英文）</a></li>
+						</ul>
+					</div>
+					<div class="dw-mast-close">
+						<ul>
+							<li><div class="dw-mast-close-ibm-cn"><a href="#"><img src="//dw1.s81c.com/i/c.gif" alt="关闭 [x]" width="20" height="10" border="0"/></a></div></li>
+						</ul>
+                    </div> 
+				</div>
+			</div>
+        </div>
+    </div>
+
+    <!-- BOTTOM ROW -->
+    <div id="ibm-universal-nav-dw">
+        <ul id="ibm-unav-links-dw">
+        	<li id="ibm-unav-home-dwlogo">
+        		<a href="http://www.ibm.com/developerworks/cn/"><img src="//dw1.s81c.com/developerworks/i/mf/dw-wordmark.gif" width="218" height="32" alt="developerWorks®" /></a>
+        	</li>
+        </ul>
+    	<ul id="ibm-menu-links-dw" class="ibm-menu-links-dw-cn">
+    		
+    		<li id="dw-mast-nav-0"><a href="http://www.ibm.com/developerworks/cn/topics">技术主题</a></li>
+    		<li id="dw-mast-nav-1"><a
+    			href="http://www.ibm.com/developerworks/cn/downloads/">软件下载</a></li>
+    		<li id="dw-mast-nav-2"><a
+    			href="https://www.ibm.com/developerworks/community/?lang=zh">社区</a></li>
+    		<li id="dw-mast-nav-3"><a href="https://www.ibm.com/developerworks/community/groups/service/html/communityview?communityUuid=6d7f9e5d-5f89-4767-a006-a81b8d186370&amp;lang=zh">技术讲座</a></li>
+    	</ul>   
+    	<form id="ibm-search-form" action="//www.ibm.com/search/csass/search/" method="get" name="form1">
+    		<input type="hidden" name="sn" value="dw" />
+    		<input type="hidden" name="lang" value="zh" />
+    		<input type="hidden" name="cc" value="CN" />
+    		<input type="hidden" name="en" value="utf" />
+    		<input type="hidden" name="hpp" value="20" />
+    		<input type="hidden" name="dws" value="cndw" />
+    		<input type="hidden" name="lo" value="zh" />
+    		<p>
+    			<label for="q"><img alt="查询:" height="1" width="1" src="//dw1.s81c.com/i/c.gif" /></label>
+    			<input type="text" value="搜索 developerWorks" name="q" maxlength="100" id="q"/>
+    			<input type="submit" id="ibm-search" class="ibm-btn-search ibm-btn-search-cn" name="Search" value="搜索" />
+    		</p>
+    	</form>
+    </div>
+    
+    <!-- BOTTOM ROW SLIDER -->
+    <div id="ibm-common-menu-dw">
+        <div class="ibm-ribbon-pane-dw">
+            <div class="ibm-ribbon-section-dw">
+				<!-- Technical topics category -->
+  
+            	<div class="dw-mast-columns">
+            	<div class="dw-mast-col-4-1">
+            		<h2><a id="dw-mast-nav-0-0" href="http://www.ibm.com/developerworks/cn/topics/">技术主题</a></h2>
+            		
+            		<ul>
+            			<li><a href="http://www.ibm.com/developerworks/cn/aix/">AIX and UNIX</a></li>
+            			<li><a href="http://www.ibm.com/developerworks/cn/cloud/">Cloud computing</a></li>
+            			<li><a href="http://www.ibm.com/developerworks/cn/ibmi/">IBM i</a></li>
+            			<li><a href="http://www.ibm.com/developerworks/cn/data/">Information management</a></li>
+            			<li><a href="http://www.ibm.com/developerworks/cn/java/">Java technology</a></li>
+            			
+            		</ul>     
+            	</div>
+            	<div class="dw-mast-col-4-2">
+            		
+            		<ul>
+            			<li><a href="http://www.ibm.com/developerworks/cn/linux/">Linux</a></li>
+            			<li><a href="http://www.ibm.com/developerworks/cn/lotus/">Lotus</a></li>
+            			<li><a href="http://www.ibm.com/developerworks/cn/opensource/">Open source</a></li>
+            			<li><a href="http://www.ibm.com/developerworks/cn/rational/">Rational</a></li>
+            			<li><a href="http://www.ibm.com/developerworks/cn/webservices/">SOA and web services</a></li>
+            			
+            		</ul>
+            	</div>
+            	<div class="dw-mast-col-4-3">
+            		
+            		<ul>
+            			<li><a href="http://www.ibm.com/developerworks/cn/web/">Web development</a></li>  
+            			<li><a href="http://www.ibm.com/developerworks/cn/websphere/">WebSphere</a></li>     
+            			<li><a href="http://www.ibm.com/developerworks/cn/xml/">XML</a></li> 
+            		</ul>
+            		
+            	</div>
+            	<div class="dw-mast-col-4-4">
+            		<ul>
+            			<li><a href="http://www.ibm.com/developerworks/cn/library/"><strong>文档库</strong></a></li>
+            			<li><a href="http://www.ibm.com/developerworks/cn/products/"><strong>产品 A - Z</strong></a></li>				    
+            		</ul>        
+            	</div>
+            	<div class="dw-mast-close">
+            		<ul>
+            			<li><div class="dw-mast-close-tech-cn"><a href="#"><img src="//dw1.s81c.com/i/c.gif" alt="关闭 [x]" width="20" height="10" border="0"/></a></div></li>
+            		</ul>
+            	</div>
+            </div>
+            	<!-- Evaluation software category -->
+            	<div class="dw-mast-columns">
+            		<div class="dw-mast-col-2-1">
+            			<h2><a id="dw-mast-nav-1-0" href="http://www.ibm.com/developerworks/cn/downloads">软件下载</a></h2>
+            			<ul>
+            				<li><a href="http://www.ibm.com/developerworks/cn/downloads/#data">Information management</a></li>
+            				<li><a href="http://www.ibm.com/developerworks/cn/downloads/#lotus">Lotus</a></li>
+            				<li><a href="http://www.ibm.com/developerworks/cn/downloads/#rational">Rational</a></li>
+            			</ul>            
+            		</div>
+            		<div class="dw-mast-col-2-2">
+            			<ul>
+            				<li><a href="http://www.ibm.com/developerworks/cn/downloads/#tivoli">Tivoli</a></li>
+            				<li><a href="http://www.ibm.com/developerworks/cn/downloads/#websphere">WebSphere</a></li>
+            				
+            			</ul>            
+            		</div>
+            		<div class="dw-mast-close">
+            			<ul>
+            				<li><div class="dw-mast-close-eval-cn"><a href="#"><img src="//dw1.s81c.com/i/c.gif" alt="关闭 [x]" width="20" height="10" border="0"/></a></div></li>
+            			</ul>
+            		</div>
+            	</div>
+            	<!-- Community category -->
+            	<div class="dw-mast-columns">
+            		<div class="dw-mast-col-2-1">
+            			<h2><a id="dw-mast-nav-2-0" href="https://www.ibm.com/developerworks/community/?lang=zh">社区</a></h2>
+            			<ul>
+            				<li><a href="https://www.ibm.com/developerworks/community/homepage/?lang=zh">我的首页</a></li>
+            				<li><a href="https://www.ibm.com/developerworks/community/profiles/home.do?lang=zh">概要信息</a></li>
+            				<li><a href="https://www.ibm.com/developerworks/community/groups/service/html/allcommunities?lang=zh">群组</a></li>
+            				<li><a href="https://www.ibm.com/developerworks/mydeveloperworks/blogs/?lang=zh">博客</a></li>
+            				<li><a href="https://www.ibm.com/developerworks/community/bookmarks/html?lang=zh">书签</a></li>  
+            			</ul>     
+            		</div>
+            		<div class="dw-mast-col-2-2">
+            			<ul>
+            				<!--	<li><a href="">Forums</a></li> -->
+            				<li><a href="https://www.ibm.com/developerworks/mydeveloperworks/wikis/home?lang=zh">Wiki</a></li>
+            				<li><a href="https://www.ibm.com/developerworks/community/files/app?lang=zh">文件</a></li>
+            				<li><a href="https://www.ibm.com/developerworks/community/activities/service/html/mainpage?lang=zh#dashboard,myactivities">活动</a></li>
+            				<!--	<li><a href="">Podcasts</a></li> -->    
+            			</ul>
+            		</div>
+            		<div class="dw-mast-close">
+            			<ul>
+            				<li><div class="dw-mast-close-comm-cn"><a href="#"><img src="//dw1.s81c.com/i/c.gif" alt="关闭 [x]" width="20" height="10" border="0"/></a></div></li>
+            			</ul>
+            		</div>
+            	</div>
+            	<!-- Events category -->
+            	<div class="dw-mast-columns">
+            		<div class="dw-mast-col-1-1">
+            			<h2><a id="dw-mast-nav-3-0" href="https://www.ibm.com/developerworks/community/groups/service/html/communityview?communityUuid=6d7f9e5d-5f89-4767-a006-a81b8d186370&amp;lang=zh">技术讲座</a></h2>
+            			<ul>
+            				<li><a href="https://www.ibm.com/developerworks/community/groups/service/html/communityview?communityUuid=6d7f9e5d-5f89-4767-a006-a81b8d186370&amp;lang=zh">技术讲座</a></li>
+            				<li><a href="http://www.ibm.com/developerworks/cn/swi/">多媒体课堂</a></li>
+            				<li><a href="http://www.ibm.com/developerworks/find/webcasts/">网络广播（英文）</a></li>
+            				<li><a href="http://www.ibm.com/developerworks/find/events/">查找活动（技术讲座，网络广播，会议等）（英文）</a></li> 
+            			</ul>            
+            		</div>
+            		<div class="dw-mast-close">
+            			<ul>
+            				<li><div class="dw-mast-close-event-cn"><a href="#"><img src="//dw1.s81c.com/i/c.gif" alt="关闭 [x]" width="20" height="10" border="0"/></a></div></li>
+            			</ul>
+            		</div>
+            	</div>
+            </div>
+        </div>
+    </div>
+	
+</div>
+<div id="fdiv" class="ibm-access"></div>
+<!-- MASTHEAD_END --><!-- MASTHEAD_END -->
+
+<div id="ibm-pcon">
+
+<!-- CONTENT_BEGIN -->
+<div id="ibm-content">
+
+<!-- Navigation_Trail_BEGIN -->
+<!-- &nbsp; -->
+      <div id="ibm-content-head"><ul id="ibm-navigation-trail"><li class="ibm-first"><a href="http://www.ibm.com/developerworks/cn/">developerWorks 中国</a></li><li><a href="http://www.ibm.com/developerworks/cn/linux/">Linux</a></li><li><a href="http://www.ibm.com/developerworks/cn/views/linux/libraryview.jsp">文档库</a></li></ul></div>
+<!-- Navigation_Trail_END -->
+
+<!-- dW_Summary Area_START -->
+<div id="dw-summary-article">
+
+<div class="dw-content-head">
+<h1>Yacc 与 Lex 快速入门</h1><p><em>Lex 与 Yacc 介绍</em></p>
+</div>
+
+<div class="ibm-container-body ibm-two-column">
+
+<div class="ibm-column ibm-first">
+<div class="author"><a class="dwauthor" rel="#authortip1" href="#author1">Ashish Bansal</a> (<a href="mailto:abansal@ieee.org?subject=Yacc 与 Lex 快速入门&amp;cc=abansal@ieee.org">abansal@ieee.org</a>), 软件工程师, Sapient 公司</div><div id="authortip1" class="dwauthor-onload-state ibm-no-print">
+Ashish Bansal 具有印度瓦腊纳西 Banaras Hindu
+大学技术学院的电子与通信工程学士学位。 他目前是 Sapient
+公司的软件工程师。他的Email是 
+        <a href="mailto:abansal@ieee.org?cc=abansal@ieee.org">abansal@sapient.com</a>。
+      </div>
+<p></p>
+  <p><strong>简介：</strong>&nbsp;Lex 和 Yacc 是 UNIX 两个非常重要的、功能强大的工具。事实上，如果你熟练掌握 Lex 和 Yacc 的话，它们的强大功能使创建 FORTRAN 和 C 的编译器如同儿戏。Ashish Bansal 为您详细的讨论了编写自己的语言和编译器所用到的这两种工具，包括常规表达式、声明、匹配模式、变量、Yacc 语法和解析器代码。最后，他解释了怎样把 Lex 和 Yacc 结合起来。</p>
+
+  <!-- <p class="ibm-no-print"><div id="dw-tag-this" class="ibm-no-print"></div><div id="interestShow" class="ibm-no-print"></div></p> -->
+<div id="dw-tag-content" class="ibm-no-print"></div><div id="dw-moretags-access" class="ibm-access"></div>
+<p class="ibm-no-print"><div id="dw-tag-this" class="ibm-no-print"><a class="ibm-external-link" onclick="jQuery.launchTagThisWindow(); return false;" href="#">标记本文！</a></div><div id="interestShow" class="ibm-no-print"></div></p>
+</div>
+
+<div class="ibm-column ibm-second">
+
+<p class="leading"><b>发布日期：</b>&nbsp;2000 年 11 月 01 日
+  
+<br /><b>级别：</b>&nbsp;初级
+    
+
+<br /><strong>访问情况 ：</strong>&nbsp;38546 次浏览
+  <br /><strong>评论：</strong>&nbsp;<span id="nCmts"><img alt="" src="//dw1.s81c.com/developerworks/i/circle-preloader.gif" height="12" width="50" /><img alt="" src="//dw1.s81c.com/i/c.gif" height="14" width="1" /></span>
+  <!-- Rating_Area_Begin -->
+  <div id="art-rating-summary"></div>
+  <!-- Rating_Area_End -->
+  <br />
+</p>
+</div>
+
+</div>
+</div>
+<!-- dW_Summary_Area_END -->
+
+<!-- CONTENT_BODY -->
+<div id="ibm-content-body">
+
+<!-- MAIN_COLUMN_BEGIN -->
+<div id="ibm-content-main">
+
+<!-- Related_Searches_Area_And_Overlays_Begin -->
+
+<!-- MAIN_COLUMN_CONTAINER_BEGIN -->
+<div class="ibm-container">
+
+<!-- MAIN_COLUMN_CONTENT_BEGIN -->
+<p>Lex 代表 Lexical Analyzar。Yacc 代表 Yet Another Compiler
+Compiler。 让我们从 Lex 开始吧。</p>
+			<p><a name="1"><span class="atitle">Lex</span></a></p>
+			<p>
+Lex
+是一种生成扫描器的工具。扫描器是一种识别文本中的词汇模式的程序。
+这些词汇模式（或者常规表达式）在一种特殊的句子结构中定义，这个我们一会儿就要讨论。</p>
+			<p>
+一种匹配的常规表达式可能会包含相关的动作。这一动作可能还包括返回一个标记。
+当 Lex
+接收到文件或文本形式的输入时，它试图将文本与常规表达式进行匹配。
+它一次读入一个输入字符，直到找到一个匹配的模式。
+如果能够找到一个匹配的模式，Lex
+就执行相关的动作（可能包括返回一个标记）。
+另一方面，如果没有可以匹配的常规表达式，将会停止进一步的处理，Lex
+将显示一个错误消息。</p>
+			<p>Lex 和 C 是强耦合的。一个
+        <em>.lex</em> 文件（Lex 文件具有
+        <em>.lex</em> 的扩展名）通过 lex 公用程序来传递，并生成 C
+的输出文件。这些文件被编译为词法分析器的可执行版本。
+      </p>
+			<div class="ibm-alternate-rule"><hr/></div><p class="ibm-ind-link ibm-back-to-top"><a href="#ibm-pcon" class="ibm-anchor-up-link">回页首</a></p><p><a name="2"><span class="atitle">Lex 的常规表达式</span></a></p>
+			<p>
+常规表达式是一种使用元语言的模式描述。表达式由符号组成。符号一般是字符和数字，但是
+Lex 中还有一些具有特殊含义的其他标记。 下面两个表格定义了 Lex
+中使用的一些标记并给出了几个典型的例子。</p>
+			<p><a name="N1005A"><span class="smalltitle">用 Lex 定义常规表达式</span></a></p>
+			<table border="1" cellpadding="3" cellspacing="0" class="ibm-data-table" width="590"><tr valign="top"><td valign="top" width="25%">
+							<strong>字符</strong>
+						</td><td valign="top" width="75%">
+							<strong>含义</strong>
+						</td></tr><tr valign="top"><td valign="top" width="25%">
+							<strong>A-Z, 0-9, a-z</strong>
+						</td><td valign="top" width="75%">构成了部分模式的字符和数字。</td></tr><tr valign="top"><td valign="top" width="25%">
+							<strong>.</strong>
+						</td><td valign="top" width="75%">匹配任意字符，除了 \n。</td></tr><tr valign="top"><td valign="top" width="25%">
+							<strong>-</strong>
+						</td><td valign="top" width="75%">用来指定范围。例如：A-Z 指从 A 到 Z
+之间的所有字符。</td></tr><tr valign="top"><td valign="top" width="25%">
+							<strong>[ ]</strong>
+						</td><td valign="top" width="75%">一个字符集合。匹配括号内的
+              <em>任意</em>
+字符。如果第一个字符是 
+              <strong>^</strong> 那么它表示否定模式。例如: [abC]
+匹配 a, b, 和 C中的任何一个。
+            </td></tr><tr valign="top"><td valign="top" width="25%">
+							<strong>*</strong>
+						</td><td valign="top" width="75%">
+匹配 
+              <em>0个</em>或者多个上述的模式。
+            </td></tr><tr valign="top"><td valign="top" width="25%">
+							<strong>+</strong>
+						</td><td valign="top" width="75%">匹配
+              <em>1个</em>或者多个上述模式。
+            </td></tr><tr valign="top"><td valign="top" width="25%">
+							<strong>?</strong>
+						</td><td valign="top" width="75%">匹配
+              <em>0个或1个</em>上述模式。
+            </td></tr><tr valign="top"><td valign="top" width="25%">
+							<strong>$</strong>
+						</td><td valign="top" width="75%">
+作为模式的最后一个字符匹配一行的结尾。</td></tr><tr valign="top"><td valign="top" width="25%">
+							<strong>{ }</strong>
+						</td><td valign="top" width="75%">指出一个模式可能出现的次数。 例如:
+A{1,3} 表示 A 可能出现1次或3次。</td></tr><tr valign="top"><td valign="top" width="25%">
+							<strong>\</strong>
+						</td><td valign="top" width="75%">
+用来转义元字符。同样用来覆盖字符在此表中定义的特殊意义，只取字符的本意。</td></tr><tr valign="top"><td valign="top" width="25%">
+							<strong>^</strong>
+						</td><td valign="top" width="75%">否定。</td></tr><tr valign="top"><td valign="top" width="25%">
+							<strong>|</strong>
+						</td><td valign="top" width="75%">表达式间的逻辑或。</td></tr><tr valign="top"><td valign="top" width="25%">
+							<strong>"&lt;一些符号&gt;"</strong>
+						</td><td valign="top" width="75%">字符的字面含义。元字符具有。</td></tr><tr valign="top"><td valign="top" width="25%">
+							<strong>/</strong>
+						</td><td valign="top" width="75%">
+向前匹配。如果在匹配的模版中的“/”后跟有后续表达式，只匹配模版中“/”前
+面的部分。如：如果输入 A01，那么在模版 A0/1 中的 A0 是匹配的。</td></tr><tr valign="top"><td valign="top" width="25%">
+							<strong>( )</strong>
+						</td><td valign="top" width="75%">将一系列常规表达式分组。</td></tr></table>
+			<p><a name="N1018C"><span class="smalltitle">常规表达式举例</span></a></p>
+			<table border="1" cellpadding="3" cellspacing="0" class="ibm-data-table" width="590"><tr valign="top"><td valign="top" width="28%">
+							<strong>常规表达式</strong>
+						</td><td valign="top" width="72%">
+							<strong>含义</strong>
+						</td></tr><tr valign="top"><td valign="top" width="28%">
+joke[rs]
+</td><td valign="top" width="72%">匹配 jokes 或 joker。</td></tr><tr valign="top"><td valign="top" width="28%">
+A{1,2}shis+
+</td><td valign="top" width="72%">匹配 AAshis, Ashis, AAshi, Ashi。</td></tr><tr valign="top"><td valign="top" width="28%">
+(A[b-e])+
+</td><td valign="top" width="72%">匹配在 A 出现位置后跟随的从 b 到 e
+的所有字符中的 0 个或 1个。</td></tr></table>
+			<p>Lex 中的标记声明类似 C
+中的变量名。每个标记都有一个相关的表达式。
+（下表中给出了标记和表达式的例子。）
+使用这个表中的例子，我们就可以编一个字数统计的程序了。
+我们的第一个任务就是说明如何声明标记。</p>
+			<p><a name="N101DD"><span class="smalltitle">标记声明举例</span></a></p>
+			<table border="1" cellpadding="3" cellspacing="0" class="ibm-data-table" width="590"><tr valign="top"><td valign="top" width="13%">
+							<strong>标记</strong>
+						</td><td valign="top" width="51%">
+							<strong>相关表达式</strong>
+						</td><td valign="top" width="36%">
+							<strong>含义</strong>
+						</td></tr><tr valign="top"><td valign="top" width="13%">数字(number)</td><td valign="top" width="51%">([0-9])+</td><td valign="top" width="36%">1个或多个数字</td></tr><tr valign="top"><td valign="top" width="13%">字符(chars)</td><td valign="top" width="51%">[A-Za-z]</td><td valign="top" width="36%">任意字符</td></tr><tr valign="top"><td valign="top" width="13%">空格(blank)</td><td valign="top" width="51%">" "</td><td valign="top" width="36%">一个空格</td></tr><tr valign="top"><td valign="top" width="13%">字(word)</td><td valign="top" width="51%">(chars)+</td><td valign="top" width="36%">1个或多个
+              <em>chars</em>
+						</td></tr><tr valign="top"><td valign="top" width="13%">变量(variable)</td><td valign="top" width="51%">(字符)+(数字)*(字符)*(数字)*</td><td valign="top" width="36%"/></tr></table>
+			<div class="ibm-alternate-rule"><hr/></div><p class="ibm-ind-link ibm-back-to-top"><a href="#ibm-pcon" class="ibm-anchor-up-link">回页首</a></p><p><a name="3"><span class="atitle">Lex 编程</span></a></p>
+			<p>
+Lex 编程可以分为三步：</p>
+			<ol>
+				<li>以 Lex 可以理解的格式指定模式相关的动作。</li>
+				<li>在这一文件上运行 Lex，生成扫描器的 C 代码。</li>
+				<li>编译和链接 C 代码，生成可执行的扫描器。</li>
+			</ol>
+			<p>注意: 如果扫描器是用 Yacc
+开发的解析器的一部分，只需要进行第一步和第二步。
+关于这一特殊问题的帮助请阅读 
+        <a href="#9">Yacc</a>和
+        <a href="#15">将 Lex 和 Yacc 结合起来</a>部分。
+      </p>
+			<p>现在让我们来看一看 Lex 可以理解的程序格式。一个 Lex
+程序分为三个段：第一段是 C 和 Lex 的全局声明，第二段包括模式（C
+代码），第三段是补充的 C 函数。 例如, 第三段中一般都有 main()
+函数。这些段以%%来分界。 那么，回到字数统计的 Lex
+程序，让我们看一下程序不同段的构成。</p>
+			<div class="ibm-alternate-rule"><hr/></div><p class="ibm-ind-link ibm-back-to-top"><a href="#ibm-pcon" class="ibm-anchor-up-link">回页首</a></p><p><a name="4"><span class="atitle">C 和 Lex 的全局声明</span></a></p>
+			<p>
+这一段中我们可以增加 C
+变量声明。这里我们将为字数统计程序声明一个整型变量，来保存程序统计出来的字数。
+我们还将进行 Lex 的标记声明。</p>
+			<br /><a name="N10296"><b>字数统计程序的声明</b></a><br />
+			<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td class="code-outline"><pre class="displaycode">
+       %{
+        int wordCount = 0;
+        %}
+        chars [A-za-z\_\'\.\"]
+        numbers ([0-9])+
+        delim [" "\n\t]
+        whitespace {delim}+
+        words {chars}+
+        %%
+</pre></td></tr></table><br />
+			<p>两个百分号标记指出了 Lex
+程序中这一段的结束和三段中第二段的开始。</p>
+			<div class="ibm-alternate-rule"><hr/></div><p class="ibm-ind-link ibm-back-to-top"><a href="#ibm-pcon" class="ibm-anchor-up-link">回页首</a></p><p><a name="5"><span class="atitle">Lex 的模式匹配规则</span></a></p>
+			<p>
+让我们看一下 Lex 描述我们所要匹配的标记的规则。（我们将使用 C
+来定义标记匹配后的动作。）
+继续看我们的字数统计程序，下面是标记匹配的规则。</p>
+			<br /><a name="N102AC"><b>字数统计程序中的 Lex 规则</b></a><br />
+			<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td class="code-outline"><pre class="displaycode">
+       {words} { wordCount++; /*
+        increase the word count by one*/ }
+        {whitespace} { /* do
+        nothing*/ }
+        {numbers} { /* one may
+        want to add some processing here*/ }
+        %%
+</pre></td></tr></table><br />
+			<div class="ibm-alternate-rule"><hr/></div><p class="ibm-ind-link ibm-back-to-top"><a href="#ibm-pcon" class="ibm-anchor-up-link">回页首</a></p><p><a name="6"><span class="atitle">C 代码</span></a></p>
+			<p>
+Lex 编程的第三段，也就是最后一段覆盖了 C
+的函数声明（有时是主函数）。注意这一段必须包括 yywrap() 函数。 Lex
+有一套可供使用的函数和变量。 其中之一就是 yywrap。
+一般来说，yywrap() 的定义如下例。我们将在 
+        <a href="#8">高级 Lex</a>
+中探讨这一问题。
+      </p>
+			<br /><a name="N102C3"><b>字数统计程序的 C 代码段</b></a><br />
+			<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td class="code-outline"><pre class="displaycode">
+       void main()
+        {
+        yylex(); /* start the
+        analysis*/
+        printf(" No of words:
+        %d\n", wordCount);
+        }
+        int yywrap()
+        {
+        return 1;
+        }
+</pre></td></tr></table><br />
+			<p>上一节我们讨论了 Lex
+编程的基本元素，它将帮助你编写简单的词法分析程序。 在 
+        <a href="#8">高级 Lex</a> 这一节中我们将讨论 Lex
+提供的函数，这样你就能编写更加复杂的程序了。
+      </p>
+			<div class="ibm-alternate-rule"><hr/></div><p class="ibm-ind-link ibm-back-to-top"><a href="#ibm-pcon" class="ibm-anchor-up-link">回页首</a></p><p><a name="7"><span class="atitle">将它们全部结合起来</span></a></p>
+			<p>
+				<em>.lex</em>文件是 Lex 的扫描器。它在 Lex 程序中如下表示：
+      </p>
+			<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td class="code-outline"><pre class="displaycode">
+   $ lex &lt;file name.lex&gt;
+</pre></td></tr></table><br />
+			<p>这生成了 lex.yy.c 文件，它可以用 C
+编译器来进行编译。它还可以用解析器来生成可执行程序，或者在链接步骤中通过选项
+�ll 包含 Lex 库。</p>
+			<p>这里是一些 Lex 的标志：
+</p>
+			<ul>
+				<li>
+					<em>-c</em>表示 C 动作，它是缺省的。
+        </li>
+				<li>
+					<em>-t</em>写入 lex.yy.c 程序来代替标准输出。
+        </li>
+				<li>
+					<em>-v</em>提供一个两行的统计汇总。
+        </li>
+				<li>
+					<em>-n</em>不打印 -v 的汇总。
+        </li>
+			</ul>
+			<div class="ibm-alternate-rule"><hr/></div><p class="ibm-ind-link ibm-back-to-top"><a href="#ibm-pcon" class="ibm-anchor-up-link">回页首</a></p><p><a name="8"><span class="atitle">高级 Lex</span></a></p>
+			<p>
+Lex
+有几个函数和变量提供了不同的信息，可以用来编译实现复杂函数的程序。
+下表中列出了一些变量和函数，以及它们的使用。 详尽的列表请参考 Lex
+或 Flex 手册（见后文的 
+        <a href="#resources">资源</a>）。
+      </p>
+			<p><a name="N10312"><span class="smalltitle">Lex 变量</span></a></p>
+			<table border="1" cellpadding="3" cellspacing="0" class="ibm-data-table" width="590"><tr valign="top"><td valign="top" width="25%">yyin</td><td valign="top" width="75%">FILE* 类型。 它指向 lexer
+正在解析的当前文件。</td></tr><tr valign="top"><td valign="top" width="25%">yyout</td><td valign="top" width="75%">FILE* 类型。 它指向记录 lexer
+输出的位置。 缺省情况下，yyin 和 yyout 都指向标准输入和输出。</td></tr><tr valign="top"><td valign="top" width="25%">yytext</td><td valign="top" width="75%">
+匹配模式的文本存储在这一变量中（char*）。</td></tr><tr valign="top"><td valign="top" width="25%">yyleng</td><td valign="top" width="75%">给出匹配模式的长度。</td></tr><tr valign="top"><td valign="top" width="25%">yylineno</td><td valign="top" width="75%">提供当前的行数信息。
+（lexer不一定支持。）</td></tr></table>
+			<p><a name="N10368"><span class="smalltitle">Lex 函数</span></a></p>
+			<table border="1" cellpadding="3" cellspacing="0" class="ibm-data-table" width="590"><tr valign="top"><td valign="top" width="25%">yylex()</td><td valign="top" width="75%">这一函数开始分析。 它由 Lex
+自动生成。</td></tr><tr valign="top"><td valign="top" width="25%">yywrap()</td><td valign="top" width="75%">这一函数在文件（或输入）的末尾调用。
+如果函数的返回值是1，就停止解析。 因此它可以用来解析多个文件。
+代码可以写在第三段，这就能够解析多个文件。 方法是使用 yyin
+文件指针（见上表）指向不同的文件，直到所有的文件都被解析。
+最后，yywrap() 可以返回 1 来表示解析的结束。</td></tr><tr valign="top"><td valign="top" width="25%">yyless(int n)</td><td valign="top" width="75%">这一函数可以用来送回除了前�n?
+个字符外的所有读出标记。</td></tr><tr valign="top"><td valign="top" width="25%">yymore()</td><td valign="top" width="75%">这一函数告诉 Lexer
+将下一个标记附加到当前标记后。</td></tr></table>
+			<p>对 Lex 的讨论就到这里。下面我们来讨论 Yacc...</p>
+			<div class="ibm-alternate-rule"><hr/></div><p class="ibm-ind-link ibm-back-to-top"><a href="#ibm-pcon" class="ibm-anchor-up-link">回页首</a></p><p><a name="9"><span class="atitle">Yacc</span></a></p>
+			<p>
+Yacc 代表 Yet Another Compiler Compiler。 Yacc 的 GNU 版叫做
+Bison。它是一种工具，将任何一种编程语言的所有语法翻译成针对此种语言的
+Yacc 语 法解析器。它用巴科斯范式(BNF, Backus Naur
+Form)来书写。按照惯例，Yacc 文件有 .y 后缀。编译行如下调用 Yacc
+编译器：</p>
+			<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td class="code-outline"><pre class="displaycode">
+       $ yacc &lt;options&gt;
+        &lt;filename ending with .y&gt;
+</pre></td></tr></table><br />
+			<p>在进一步阐述以前，让我们复习一下什么是语法。在上一节中，我们看到
+Lex 从输入序列中识别标记。
+如果你在查看标记序列，你可能想在这一序列出现时执行某一动作。
+这种情况下有效序列的规范称为语法。Yacc 语法文件包括这一语法规范。
+它还包含了序列匹配时你想要做的事。</p>
+			<p>为了更加说清这一概念，让我们以英语为例。 这一套标记可能是：名词,
+动词,
+形容词等等。为了使用这些标记造一个语法正确的句子，你的结构必须符合一定的规则。
+一个简单的句子可能是名词+动词或者名词+动词+名词。(如 I care. See
+spot run.)</p>
+			<p>所以在我们这里，标记本身来自语言（Lex），并且标记序列允许用 Yacc
+来指定这些标记(标记序列也叫语法)。</p>
+			<div class="ibm-container ibm-alt-header dw-container-sidebar"><h2>终端和非终端符号</h2><div class="ibm-container-body">
+				
+				<p>
+					<strong>终端符号</strong> : 代表一类在语法结构上等效的标记。
+终端符号有三种类型：
+        </p>
+				<p>
+					<em>命名标记</em>: 这些由
+          <em>%token</em> 标识符来定义。
+按照惯例，它们都是大写。
+        </p>
+				<p>
+					<em>字符标记</em> : 字符常量的写法与 C 相同。例如, --
+就是一个字符标记。
+        </p>
+				<p>
+					<em>字符串标记</em> : 写法与 C 的字符串常量相同。例如，"&lt;&lt;"
+就是一个字符串标记。
+        </p>
+				<p>lexer 返回命名标记。</p>
+				<p>
+					<strong>非终端符号</strong> : 是一组非终端符号和终端符号组成的符号。
+按照惯例，它们都是小写。 在例子中，file 是一个非终端标记而 NAME
+是一个终端标记。
+        </p>
+			</div></div>
+			<p>用 Yacc 来创建一个编译器包括四个步骤：</p>
+			<ol>
+				<li>通过在语法文件上运行 Yacc 生成一个解析器。</li>
+				<li>说明语法：
+          <ul>
+						<li>编写一个 .y 的语法文件（同时说明 C 在这里要进行的动作）。</li>
+						<li>编写一个词法分析器来处理输入并将标记传递给解析器。 这可以使用
+Lex 来完成。</li>
+						<li>编写一个函数，通过调用 yyparse() 来开始解析。</li>
+						<li>编写错误处理例程（如 yyerror()）。</li>
+					</ul>
+				</li>
+				<li>编译 Yacc 生成的代码以及其他相关的源文件。</li>
+				<li>将目标文件链接到适当的可执行解析器库。</li>
+			</ol>
+			<div class="ibm-alternate-rule"><hr/></div><p class="ibm-ind-link ibm-back-to-top"><a href="#ibm-pcon" class="ibm-anchor-up-link">回页首</a></p><p><a name="10"><span class="atitle">用 Yacc 编写语法</span></a></p>
+			<p>
+如同 Lex 一样, 一个 Yacc 程序也用双百分号分为三段。
+它们是：声明、语法规则和 C 代码。 我们将解析一个格式为 姓名 = 年龄
+的文件作为例子，来说明语法规则。
+我们假设文件有多个姓名和年龄，它们以空格分隔。 在看 Yacc
+程序的每一段时，我们将为我们的例子编写一个语法文件。</p>
+			<div class="ibm-alternate-rule"><hr/></div><p class="ibm-ind-link ibm-back-to-top"><a href="#ibm-pcon" class="ibm-anchor-up-link">回页首</a></p><p><a name="11"><span class="atitle">C 与 Yacc 的声明</span></a></p>
+			<p>
+C 声明可能会定义动作中使用的类型和变量，以及宏。
+还可以包含头文件。每个 Yacc
+声明段声明了终端符号和非终端符号（标记）的名称，还可能描述操作符优先级和针对不同符号的数据类型。
+lexer (Lex) 一般返回这些标记。所有这些标记都必须在 Yacc
+声明中进行说明。</p>
+			<p>在文件解析的例子中我们感兴趣的是这些标记：name, equal sign, 和
+age。Name 是一个完全由字符组成的值。 Age
+是数字。于是声明段就会像这样：</p>
+			<br /><a name="N1042C"><b>文件解析例子的声明</b></a><br />
+			<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td class="code-outline"><pre class="displaycode">
+       %
+        #typedef char* string; /*
+        to specify token types as char* */
+        #define YYSTYPE string /*
+        a Yacc variable which has the value of returned token */
+        %}
+        %token NAME EQ AGE
+        %%
+</pre></td></tr></table><br />
+			<p>你可能会觉得 YYSTYPE 有点奇怪。但是类似 Lex, Yacc
+也有一套变量和函数可供用户来进行功能扩展。 YYSTYPE 定义了用来将值从
+lexer 拷贝到解析器或者 Yacc 的 yylval （另一个 Yacc 变量）的类型。
+默认的类型是 int。 由于字符串可以从 lexer 拷贝，类型被重定义为
+char*。 关于 Yacc 变量的详细讨论，请参考 Yacc 手册（见 
+        <a href="#resources">资源</a>）。
+      </p>
+			<div class="ibm-alternate-rule"><hr/></div><p class="ibm-ind-link ibm-back-to-top"><a href="#ibm-pcon" class="ibm-anchor-up-link">回页首</a></p><p><a name="12"><span class="atitle">Yacc 语法规则</span></a></p>
+			<p>
+Yacc 语法规则具有以下一般格式：</p>
+			<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td class="code-outline"><pre class="displaycode">
+       result: components { /*
+        action to be taken in C */ }
+        ;
+</pre></td></tr></table><br />
+			<p>在这个例子中，result 是规则描述的非终端符号。Components
+是根据规则放在一起的不同的终端和非终端符号。 如果匹配特定序列的话
+Components 后面可以跟随要执行的动作。 考虑如下的例子：</p>
+			<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td class="code-outline"><pre class="displaycode">
+       param : NAME EQ NAME {
+        printf("\tName:%s\tValue(name):%s\n", $1,$3);}
+            | NAME EQ VALUE{
+            printf("\tName:%s\tValue(value):%s\n",$1,$3);}
+        ;
+</pre></td></tr></table><br />
+			<p>如果上例中序列 NAME EQ NAME 被匹配，将执行相应的 { }
+括号中的动作。 这里另一个有用的就是 $1 和 $3 的使用, 它们引用了标记
+NAME 和 NAME（或者第二行的 VALUE）的值。 lexer 通过 Yacc 的变量
+yylval 返回这些值。标记 NAME 的 Lex 代码是这样的：</p>
+			<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td class="code-outline"><pre class="displaycode">
+       char [A-Za-z]
+        name {char}+
+        %%
+        {name} { yylval = strdup(yytext);
+        return NAME; }
+</pre></td></tr></table><br />
+			<p>文件解析例子的规则段是这样的：</p>
+			<br /><a name="N1045B"><b>文件解析的语法</b></a><br />
+			<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td class="code-outline"><pre class="displaycode">
+       file : record file
+        | record
+        ;
+        record: NAME EQ AGE {
+        printf("%s is now %s years old!!!", $1, $3);}
+        ;
+        %%
+</pre></td></tr></table><br />
+			<div class="ibm-alternate-rule"><hr/></div><p class="ibm-ind-link ibm-back-to-top"><a href="#ibm-pcon" class="ibm-anchor-up-link">回页首</a></p><p><a name="13"><span class="atitle">附加 C 代码</span></a></p>
+			<p>
+现在让我们看一下语法文件的最后一段，附加 C 代码。
+（这一段是可选的，如果有人想要略过它的话：）一个函数如 main() 调用
+yyparse() 函数（Yacc 中 Lex 的 yylex() 等效函数）。 一般来说，Yacc
+最好提供 yyerror(char msg) 函数的代码。 当解析器遇到错误时调用
+yyerror(char msg)。错误消息作为参数来传递。 一个简单的 yyerror(
+char* ) 可能是这样的：</p>
+			<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td class="code-outline"><pre class="displaycode">
+       int yyerror(char* msg)
+        {
+        printf("Error: %s
+        encountered at line number:%d\n", msg, yylineno);
+        }
+</pre></td></tr></table><br />
+			<p>yylineno 提供了行数信息。</p>
+			<p>这一段还包括文件解析例子的主函数：</p>
+			<br /><a name="N10478"><b>附加 C 代码</b></a><br />
+			<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td class="code-outline"><pre class="displaycode">
+       void main()
+        {
+            yyparse();
+        }
+        int yyerror(char* msg)
+        {
+        printf("Error: %s
+        encountered \n", msg);
+</pre></td></tr></table><br />
+			<p>要生成代码，可能用到以下命令：</p>
+			<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td class="code-outline"><pre class="displaycode">
+       $ yacc _d &lt;filename.y&gt;
+</pre></td></tr></table><br />
+			<p>这生成了输出文件 y.tab.h 和 y.tab.c，它们可以用 UNIX
+上的任何标准 C 编译器来编译（如 gcc）。</p>
+			<div class="ibm-alternate-rule"><hr/></div><p class="ibm-ind-link ibm-back-to-top"><a href="#ibm-pcon" class="ibm-anchor-up-link">回页首</a></p><p><a name="14"><span class="atitle">命令行的其他常用选项</span></a></p>
+			<ul>
+				<li>
+					<em>'-d' ,'--defines'</em> :
+编写额外的输出文件，它们包含这些宏定义：语法中定义的标记类型名称，语义的取值类型
+          <em>YYSTYPE</em>, 以及一些外部变量声明。如果解析器输出文件名叫
+'name.c', 那么 '-d' 文件就叫做 'name.h'。 如果你想将 
+          <em>yylex</em>
+定义放到独立的源文件中，你需要 'name.h', 因为 
+          <em>yylex</em>
+必须能够引用标记类型代码和 
+          <em>yylval</em>变量。
+        </li>
+				<li>
+					<em>'-b file-prefix' ,'--file-prefix=prefix'</em> :
+指定一个所有Yacc输出文件名都可以使用的前缀。选择一个名字，就如输入文件名叫
+'prefix.c'.
+        </li>
+				<li>
+					<em>'-o outfile' ,'--output-file=outfile'</em> :
+指定解析器文件的输出文件名。其他输出文件根据 '-d'
+选项描述的输出文件来命名。
+        </li>
+			</ul>
+			<p>Yacc
+库通常在编译步骤中自动被包括。但是它也能被显式的包括，以便在编译步骤中指定
+        <em>�ly</em>选项。这种情况下的编译命令行是：
+      </p>
+			<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td class="code-outline"><pre class="displaycode">
+       $ cc &lt;source file
+        names&gt; -ly
+</pre></td></tr></table><br />
+			<div class="ibm-alternate-rule"><hr/></div><p class="ibm-ind-link ibm-back-to-top"><a href="#ibm-pcon" class="ibm-anchor-up-link">回页首</a></p><p><a name="15"><span class="atitle">将 Lex 与 Yacc 结合起来</span></a></p>
+			<p>
+到目前为止我们已经分别讨论了 Lex 和
+Yacc。现在让我们来看一下他们是怎样结合使用的。</p>
+			<p>一个程序通常在每次返回一个标记时都要调用
+        <em>yylex()</em>
+函数。只有在文件结束或者出现错误标记时才会终止。
+      </p>
+			<p>一个由 Yacc 生成的解析器调用
+        <em>yylex()</em>
+函数来获得标记。 
+        <em>yylex()</em> 可以由 Lex
+来生成或完全由自己来编写。 对于由 Lex 生成的 lexer 来说，要和 Yacc
+结合使用，每当 Lex 中匹配一个模式时都必须返回一个标记。 因此 Lex
+中匹配模式时的动作一般格式为：
+      </p>
+			<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td class="code-outline"><pre class="displaycode">
+       {pattern} { /* do smthg*/
+        return TOKEN_NAME; }
+</pre></td></tr></table><br />
+			<p>于是 Yacc 就会获得返回的标记。当 Yacc 编译一个带有 _d 标记的
+        <em>.y</em>文件时，会生成一个头文件，它对每个标记都有
+        <em>#define</em>
+的定义。 如果 Lex 和 Yacc 一起使用的话，头文件必须在相应的 Lex 文件
+        <em>.lex</em>中的 C 声明段中包括。
+      </p>
+			<p>让我们回到名字和年龄的文件解析例子中，看一看 Lex 和 Yacc
+文件的代码。</p>
+			<br /><a name="N104E8"><b>Name.y - 语法文件</b></a><br />
+			<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td class="code-outline"><pre class="displaycode">
+       %
+        typedef char* string;
+        #define YYSTYPE string
+        %}
+        %token NAME EQ AGE
+        %%
+        file : record file
+        | record
+        ;
+        record : NAME EQ AGE {
+        printf("%s is %s years old!!!\n", $1, $3); }
+        ;
+        %%
+        int main()
+        {
+        yyparse();
+        return 0;
+        }
+        int yyerror(char *msg)
+        {
+        printf("Error
+        encountered: %s \n", msg);
+        }
+</pre></td></tr></table><br />
+			<br />
+			<br /><a name="N104F4"><b>Name.lex - Lex 的解析器文件</b></a><br />
+			<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td class="code-outline"><pre class="displaycode">
+       %{
+        #include "y.tab.h"
+        
+        #include &lt;stdio.h&gt;
+        #include &lt;string.h&gt;
+        extern char* yylval;
+        %}
+        char [A-Za-z]
+        num [0-9]
+        eq [=]
+        name {char}+
+        age {num}+
+        %%
+        {name} { yylval = strdup(yytext);
+        return NAME; }
+        {eq} { return EQ; }
+        {age} { yylval = strdup(yytext);
+        return AGE; }
+        %%
+        int yywrap()
+        {
+        return 1;
+        }
+</pre></td></tr></table><br />
+			<p>作为一个参考，我们列出了
+        <em>y.tab.h</em>, Yacc 生成的头文件。
+      </p>
+			<br /><a name="N10504"><b>y.tab.h - Yacc 生成的头文件</b></a><br />
+			<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td class="code-outline"><pre class="displaycode">
+       # define NAME 257
+        # define EQ 258
+        # define AGE 259
+</pre></td></tr></table><br />
+			<p>我们对于 Lex 和
+Yacc的讨论到此为止。今天你想要编译什么语言呢？</p>
+		<!-- CMA ID: 22294 --> <!-- Site ID: 10 --> <!-- XSLT stylesheet used to transform this file:  dw-article-6.0-beta.xsl -->
+<br />
+<p><a name="resources"><span class="atitle">参考资料 </span></a></p>
+			<ul><li>您可以参阅本文在 developerWorks 全球站点上的
+          <a href="http://www.ibm.com/developerworks/library/l-lex.html?S_TACT=105AGX52&amp;S_CMP=cn-a-l">英文原文</a>.
+        <br /><br /></li><li>
+					<a href="http://www.amazon.com/exec/obidos/ASIN/1565920007/qid=966761542/sr=1-1/102-9713829-1677713">Lex and Yacc</a>, Levine, Mason 和 Branson, O�Reilly
+及其合作公司，2nd Ed。
+        <br /><br /></li><li>
+					<a href="http://www.amazon.com/exec/obidos/ASIN/0132373971/qid=966761701/sr=1-2/102-9713829-1677713">Program Development in UNIX</a>, J. T. Shen, Prentice-Hall
+India。
+        <br /><br /></li><li>
+					<a href="http://www.amazon.com/exec/obidos/ASIN/0201100886/o/qid=966761739/sr=2-1/102-9713829-1677713">Compilers: Principles, Techniques and Tools</a>, Ahoo, Sethi 和
+Ullman, Addison-Wesley Pub. Co., 1985，11。
+        <br /><br /></li><li>
+					<a href="http://tinf2.vub.ac.be/~dvermeir/courses/compilers/">Lex and
+Yacc and compiler writing</a>指导。
+        <br /><br /></li><li>Java 版的 Lex 指导, 叫做
+          <a href="http://bmrc.berkeley.edu/courseware/cs164/fall99/assignment/a1/tutorial.html">Jlex</a>。
+        <br /><br /></li><li>使用 Lex 和 Yacc 的
+          <a href="http://www.cs.man.ac.uk/~pjj/cs2111/ex5_hint.html">formalizing
+a grammar</a>实例。
+        <br /><br /></li></ul>
+<p><a name="author"><span class="atitle">关于作者</span></a></p><div class="ibm-container ibm-portrait-module ibm-alternate-two"><div class="ibm-container-body"><p><a name="author1"> </a>
+Ashish Bansal 具有印度瓦腊纳西 Banaras Hindu
+大学技术学院的电子与通信工程学士学位。 他目前是 Sapient
+公司的软件工程师。他的Email是 
+        <a href="mailto:abansal@ieee.org?cc=abansal@ieee.org">abansal@sapient.com</a>。
+      </p></div></div>
+<!-- MAIN_COLUMN_CONTENT_END -->
+  <!-- OVERLAYS_START -->
+  <!-- Report_Abuse_Start -->
+  <div class="ibm-common-overlay ibm-no-print" id="reportabuseoverlay">
+    <div class="ibm-head"><p><a class="ibm-common-overlay-close" href="#">关闭 [x]</a></p></div>
+    <div class="ibm-body">
+      <div class="ibm-main">
+        <a class="ibm-access" name="reportabuseoverlay">关于报告滥用的帮助</a>   
+        <div class="ibm-title"><h1>报告滥用</h1></div>
+        <div class="ibm-container ibm-alternate">
+          <p><strong>谢谢!</strong>  此内容已经标识给管理员注意。</p>
+          <div class="ibm-overlay-rule"><hr /></div>
+          <div class="ibm-buttons-row">
+            <input type="button" onclick="ibmCommon.Overlays.hide('reportabuseoverlay');return false;" class="ibm-btn-cancel-sec dw-btn-cancel-sec" name="ibm-cancel" value="关闭" />
+          </div>
+        </div>
+      </div> 
+    </div>
+    <div class="ibm-footer"></div>
+  </div>
+  <!-- Report_Abuse_Error_Start -->
+  <div class="ibm-common-overlay ibm-no-print" id="reportabuseoverlayerror">
+    <div class="ibm-head"><p><a class="ibm-common-overlay-close" href="#">关闭 [x]</a></p></div>
+    <div class="ibm-body">
+      <div class="ibm-main">
+        <a class="ibm-access" name="reportabuseoverlayerror">关于报告滥用的帮助</a>   
+        <div class="ibm-title"><h1>报告滥用</h1></div>
+        <div class="ibm-container ibm-alternate">
+          <p class="ibm-ind-error"><strong>报告滥用提交失败。  请稍后重试。</strong></p>
+          <div class="ibm-overlay-rule"><hr /></div>
+          <div class="ibm-buttons-row">
+            <input type="button" onclick="ibmCommon.Overlays.hide('reportabuseoverlayerror');return false;" class="ibm-btn-cancel-sec dw-btn-cancel-sec" name="ibm-cancel" value="关闭" />
+          </div>
+        </div>
+      </div> 
+    </div>
+    <div class="ibm-footer"></div>
+  </div>
+  <!-- Sign in OVERLAY STARTS HERE --> 
+  <div class="ibm-common-overlay" id="signin_overlay">
+    <div class="ibm-head">
+      <p><a class="ibm-common-overlay-close" href="#" onclick="clearForm();">关闭 [x]</a></p>
+    </div>
+    <div class="ibm-body">
+      <div class="ibm-main">
+        <div class="ibm-title ibm-subtitle">
+          <h1>developerWorks：登录</h1>
+          <div id="ibm-overlay-error-signin" class="no-display"></div>
+        </div>
+        
+        <div class="ibm-container ibm-alternate ibm-buttons-last">
+          <div class="ibm-container-body">
+
+            <form class="ibm-column-form" id="sFormId" action="" method="post" name="sForm" onsubmit="return false;">
+              <p><label for="ibmid">IBM ID：</label><span><input name="ibm-id" id="ibmid" size="25" value="" class="required" type="text" onkeypress="handleEP(event,this.form);" />
+                <br /><a class="ibm-forward-link" href="#" onclick="(function () {window.location='/developerworks/dwwi/DWAuthRouter?m=reg&amp;lang=zh_CN&amp;d='+encodeURIComponent(location.href);})();">需要一个 IBM ID？</a>
+                <br /><a class="ibm-forward-link" href="/developerworks/dwwi/jsp/WSHelp.jsp?lang=zh_CN">忘记 IBM ID？</a></span>   
+              </p> 
+              <p><label for="password">密码：</label><span><input name="password" id="password" size="25" value="" class="required" type="password" onkeypress="handleEP(event,this.form);" /><br />
+                <a class="ibm-forward-link" href="#" onclick="(function () {window.location='https://www.ibm.com/account/profile?page=forgot&amp;lang=zh_CN&amp;appname=ibm&amp;required=null&amp;d='+encodeURIComponent(getAuthUrl())+'%3Fm%3Dloginpage%26lang%3Dzh_CN%26d%3D'+encodeURIComponent(location.href);})();">忘记密码？</a><br />
+                <a class="ibm-forward-link" href="#" onclick="(function () {window.location='https://www.ibm.com/account/profile?page=chpw&amp;lang=zh_CN&amp;appname=ibm&amp;required=null&amp;d='+encodeURIComponent(location.href);})();">更改您的密码</a></span></p> 
+
+              <p class="dw-perm-box">
+                <span><input id="perm" type="checkbox" name="perm_name"/><label for="perm"> 保持登录。</label></span>
+              </p>
+
+              <p>单击提交则表示您同意developerWorks 的条款和条件。 <a href="/developerworks/mydeveloperworks/terms?lang=zh">使用条款</a></p>
+              <div class="ibm-buttons-row">
+                <p><input class="ibm-btn-arrow-pri" name="ibm-submit" value="提交" onclick="signin();return false;" type="submit" /><span class="ibm-sep">&nbsp;</span>
+                  <input value="取消" type="button" name="ibm-cancel" class="ibm-btn-cancel-sec" onclick="clearForm();ibmCommon.Overlays.hide('signin_overlay');return false;"/></p>
+              </div>
+            </form>
+            <div class="ibm-overlay-rule"><hr /></div>
+            <p>当您初次登录到 developerWorks 时，将会为您创建一份概要信息。<strong>您在 developerWorks 概要信息中选择公开的信息将公开显示给其他人，但您可以随时修改这些信息的显示状态。</strong>您的姓名（除非选择隐藏）和昵称将和您在 developerWorks 发布的内容一同显示。</p>
+            <div class="dw-overlay-legal"><p>所有提交的信息确保安全。</p></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="ibm-footer"></div>
+  </div>
+  <!-- Sign in OVERLAY ENDS HERE --> 
+  
+  
+  <!-- Display name OVERLAY STARTS HERE --> 
+  <div class="ibm-common-overlay" id="displayname_overlay">
+    <div class="ibm-head">
+      <p><a class="ibm-common-overlay-close" href="#" onclick="clearForm();">关闭 [x]</a></p>
+    </div>
+    <div class="ibm-body">
+      <div class="ibm-main">
+        <div class="ibm-title ibm-subtitle">
+          <h1>请选择您的昵称：</h1>
+          <div id="ibm-overlay-error-dname" class="no-display"></div>
+        </div>
+        <div class="ibm-container ibm-alternate ibm-buttons-last">
+          <div class="ibm-container-body">
+            <p class="ibm-overlay-intro">当您初次登录到 developerWorks 时，将会为您创建一份概要信息，您需要指定一个昵称。您的昵称将和您在 developerWorks 发布的内容显示在一起。</p><p><strong>昵称长度在 3 至 31 个字符之间</strong>。 您的昵称在 developerWorks 社区中必须是唯一的，并且出于隐私保护的原因，不能是您的电子邮件地址。</p>
+            <form id="dFormId" method="post" action="" name="dForm" onsubmit="return false;" class="ibm-column-form">
+              <p><label for="displayname">昵称：</label><span><input name="displayname" id="displayname" size="25" value="" type="text" onkeypress="handleEP(event,this.form);" /></span><span class="ibm-form-note">（长度在 3 至 31 个字符之间）</span>
+              </p>
+              
+              <div class="ibm-overlay-rule"><hr />
+              </div>
+              <p>单击<strong>提交</strong>则表示您同意developerWorks 的条款和条件。 <a href="/developerworks/mydeveloperworks/terms?lang=zh">使用条款</a>.</p>
+              <div class="ibm-buttons-row">
+                <p><input class="ibm-btn-arrow-pri" name="ibm-submit" value="提交" onclick="signin();return false;" type="submit" /><span class="ibm-sep">&nbsp;</span>
+                  <input value="取消" type="button" name="ibm-cancel" class="ibm-btn-cancel-sec" onclick="clearForm();ibmCommon.Overlays.hide('displayname_overlay');return false;" /></p>
+              </div>
+            </form>
+            <div class="ibm-overlay-rule"><hr /></div>
+            <div class="dw-overlay-legal"><p>所有提交的信息确保安全。</p></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="ibm-footer"></div>
+  </div>
+  <!-- Display name OVERLAY ENDS HERE -->
+  <!-- OVERLAYS_END -->
+  <!-- RATINGS START -->
+  <p class="ibm-no-print"><span class="atitle"><a name="iratings">为本文评分</a></span></p>
+  <input id="art-rating" name="ratinga" type="hidden" value="0"/><div id="art-rating-module"></div>
+  <script language="JavaScript" type="text/javascript">
+    // <![CDATA[
+   // widget div id and article id as args
+   window.artRating.init('art-rating-module','art-rating-summary');
+// ]]>
+  </script>
+  <!-- RATINGS END --> 
+  
+  <!-- INLINE_COMMENTS_START -->
+  <p class="ibm-no-print"><span class="atitle"><a name="icomments">评论</a></span></p>
+    <script language="JavaScript" type="text/javascript">
+      // <![CDATA[
+dwc = {};
+dwc.cmts = '条评论';
+dwc.signInPreText = '请';
+dwc.signIn = '登录';
+dwc.or = '或';
+dwc.register = '注册';
+dwc.signInPostText = '';
+dwc.leaveCmt = '后发表评论。';
+dwc.view = '查看';
+dwc.totalCmts = '共有评论';
+dwc.postYourCmt = '添加您的评论';
+dwc.show = '显示：';
+dwc.recentCmts = '最新评论';
+dwc.allCmts = '所有评论';
+dwc.tooLongCmt = '您的评论超过了 1000 字符限制';
+dwc.numCharsLeft = '剩余 <span id="charCount">{1}</span> 字符';
+dwc.reportAbuse = '报告滥用';
+dwc.notifyMsg = '有新评论时提醒我';
+dwc.htmlWarning = '注意：评论中不支持 HTML 语法'; 
+dwc.cmt = '评论：';
+dwc.addCmts = '添加评论';
+dwc.addCmt = '添加评论';
+dwc.doNotErase = '--在下方添加评论--'; 
+dwc.viewOrAddCmts = '查看或添加评论';
+dwc.reportInapprCont = '举报不良信息';
+dwc.reportInapprContLink = 'http://www.ibm.com/developerworks/forums/forum.jspa?forumID=1834';
+dwc.postingCmt = '正在发布评论……';
+dwc.noCmt = '快来添加第一条评论';
+dwc.netwkErr = '在检索评论时出错，请稍后刷新。';
+dwc.addACmt = '添加评论';
+dwc.instructCmt = '标有星号（<span class="ibm-required">*</span>）的是必填项目。';
+dwc.btnPost = '发布';
+dwc.btnPostAnon = '匿名发布';
+dwc.btnClrCmt = '清除评论';
+dwc.btnCancel = '取消';
+dwc.showRecent = '显示最新的 {1} 条评论'; // {1} is the count to be substituted
+dwc.showNext = '显示后 {1} 条评论'; // {1} is the count to be substituted
+dwc.showAllCmts = '显示所有评论';
+dwc.enterCmt = '请输入评论内容。';
+dwc.loginErr = '暂时无法验证您的登录状态，请稍后再试。';
+dwc.postErr = '暂时无法发布您的评论，请稍后再试。';
+dwc.postBy = '由 <strong>{1}</strong>  于 {2} '; // {1} is the author to be substituted; {2} is the date
+dwc.siteId = 10;
+dwc.lang = 'zh_CN';
+dwc.viperLang = 'zh';
+// ]]>
+    </script>
+    <div id="threadShow"></div>
+  <!-- INLINE_COMMENTS_END -->
+  
+
+  <p class="ibm-ind-link ibm-back-to-top"><a class="ibm-anchor-up-link" href="#ibm-pcon">回页首</a></p>
+
+<!-- Overlays -->
+<!-- lk - pull in overlays from ww when required on cn -->
+  </div>
+<!-- MAIN_COLUMN_CONTAINER_END -->
+
+<!-- Rating_Meta_BEGIN -->
+<!--Rating_Meta_BEGIN--><div class="metavalue">static.content.url=http://www.ibm.com/developerworks/js/artrating/</div><div class="metavalue">SITE_ID=10</div><div class="metavalue">Zone=Linux</div><div class="metavalue">ArticleID=22294</div><div class="metavalue">ArticleTitle=Yacc 与 Lex 快速入门</div><div class="metavalue">publish-date=11012000</div><div class="metavalue">author1-email=abansal@ieee.org</div><div class="metavalue">author1-email-cc=abansal@ieee.org</div><script language="javascript" type="text/javascript">document.write('<div class="metavalue">url='+location.href.replace(/</g, '%3C')+'</div>');</script><!--Rating_Meta_END-->
+<!-- Rating_Meta_END -->
+
+</div>
+<!-- MAIN_COLUMN_END-->
+
+<!-- RIGHT_COLUMN_BEGIN -->
+<div id="ibm-content-sidebar">
+
+<!-- RIGHT_COLUMN_CONTENT_BEGIN --> 
+<div class="ibm-container"><h2>内容</h2><div class="ibm-container-body"><img alt="" height="1" width="1" src="//www.ibm.com/i/c.gif"/><ul class="ibm-bullet-list"><li><a class="ibm-feature-link" href="#1">Lex</a></li><li><a class="ibm-feature-link" href="#2">Lex 的常规表达式</a></li><li><a class="ibm-feature-link" href="#3">Lex 编程</a></li><li><a class="ibm-feature-link" href="#4">C 和 Lex 的全局声明</a></li><li><a class="ibm-feature-link" href="#5">Lex 的模式匹配规则</a></li><li><a class="ibm-feature-link" href="#6">C 代码</a></li><li><a class="ibm-feature-link" href="#7">将它们全部结合起来</a></li><li><a class="ibm-feature-link" href="#8">高级 Lex</a></li><li><a class="ibm-feature-link" href="#9">Yacc</a></li><li><a class="ibm-feature-link" href="#10">用 Yacc 编写语法</a></li><li><a class="ibm-feature-link" href="#11">C 与 Yacc 的声明</a></li><li><a class="ibm-feature-link" href="#12">Yacc 语法规则</a></li><li><a class="ibm-feature-link" href="#13">附加 C 代码</a></li><li><a class="ibm-feature-link" href="#14">命令行的其他常用选项</a></li><li><a class="ibm-feature-link" href="#15">将 Lex 与 Yacc 结合起来</a></li><li><a class="ibm-feature-link" href="#resources">参考资料 </a></li><li><a class="ibm-feature-link" href="#author">关于作者</a></li><li><a class="ibm-feature-link" href="#icomments">建议</a></li></ul></div></div>
+
+ 
+
+<!-- Tagging_Start -->
+<div id="dw-tag-cloud-container" class="ibm-container dw-hidetag"><h2>标签</h2>
+<div id="dw-tag-help"><a class="dwauthor" rel="#tagtip" id="dwtagtip"><img alt="Help" height="16" width="16" align="top" src="//dw1.s81c.com/developerworks/i/help_icon.gif"/></a></div>
+<div id="tagtip" class="dwauthor-onload-state ibm-no-print">使用 <strong>搜索</strong> 文本框在 My developerWorks 中查找包含该标签的所有内容。<p>使用 <strong>滑动条</strong> 调节标签的数量。</p><p><strong>热门标签</strong> 显示了特定专区最受欢迎的标签（例如 Java technology，Linux，WebSphere）。</p><p><strong>我的标签</strong> 显示了特定专区您标记的标签（例如 Java technology，Linux，WebSphere）。</p></div>
+<div class="ibm-access">使用搜索文本框在 My developerWorks 中查找包含该标签的所有内容。<em>热门标签</em> 显示了特定专区最受欢迎的标签（例如 Java technology，Linux，WebSphere）。<em>我的标签</em> 显示了特定专区您标记的标签（例如 Java technology，Linux，WebSphere）。</div>
+<div class="ibm-container-body">
+<div class="dw-tag-search"><form action="//www.ibm.com/developerworks/mydeveloperworks/bookmarks/html" method="get" id="actualtagform" onsubmit="popupform(this, 'join')">
+<p><label for="tagfield"><strong>搜索所有标签</strong></label>
+<input type="hidden" name="lang" value="zh"/>
+<input id="tagfield" name="tag" type="text" maxlength="20" size="17" />&nbsp;<input src="//dw1.s81c.com/i/v16/buttons/short-btn.gif" type="image" class="ibm-btn-view" alt="submit search" title="提交搜索" value="Search" /></p></form></div>
+<div class="ibm-rule"><hr/></div>
+<div id="dw-tag-select">
+<div id="dw-tag-select-popular"><p><strong>热门文章标签</strong>&nbsp;|&nbsp;<br /><a id="a-my" href="javascript:;">我的文章标签</a><a href="#dw-tag-access" class="ibm-access">跳转到标签列表</a></p></div>
+<div id="dw-tag-select-my" class="dw-hidetag"><p><a id="a-popular" href="javascript:;">热门文章标签</a>&nbsp;|&nbsp;<br /><strong>我的文章标签</strong></p><a href="#dw-tag-access" class="ibm-access">跳转到标签列表</a></div>
+<div id="dw-tag-cloud"></div>  
+</div>   
+</div>
+</div>
+<!-- Tagging_End -->
+
+<!-- Dig_Deeper -->
+
+<!-- High_Visibility_Offer -->
+
+<!-- Special_Offers -->
+
+<!-- RIGHT_COLUMN_CONTENT_END -->
+
+</div>
+<!-- RIGHT_COLUMN_END -->
+
+<!-- CONTENT_BODY_END -->
+</div>
+
+</div>
+<!-- CONTENT_END -->
+
+ <!-- END_IBM-PCON -->
+</div>
+
+<!-- FOOTER_BEGIN -->
+<div id="ibm-footer">
+<!-- IBM footer container; disabled -->
+</div>
+
+<div id="ibm-page-tools-dw">
+	<div id="dw-footer-top-row">
+		<ul id="dw-foot-options">
+			<li id="dw-print"><a class="ibm-print-link" href="#">打印此页面</a></li>
+		</ul>
+		<ul id="ibm-foot-options-dw">
+			<li id="dw-foot-0" class="dw-foot-0-cn"><a href="#">分享此页面</a></li>
+			<li id="dw-foot-1" class="dw-foot-1-cn"><a href="#">关注 developerWorks</a></li>
+		</ul>
+	</div>       
+	
+	
+	<!-- TOP ROW SLIDER -->
+    <div id="dw-page-tools-menu">    
+        <div class="ibm-ribbon-pane-dw">
+            <div class="ibm-ribbon-section-dw">
+				<!-- Share this page -->			
+                <div class="dw-footer-columns">
+                    <div class="dw-footer-col-3-1">
+                    	<h2>分享此页面：</h2>                            
+						<ul class="ibm-link-list">
+							<li><a id="dw-foot-0-0" class="ibm-facebook-link" href="#">Facebook</a></li>
+							<li><a class="ibm-linkedin-link" href="#">LinkedIn</a></li>
+							<li><a class="ibm-twitter-link" href="#">Twitter</a></li>
+						</ul>
+                    </div>
+                    <div class="dw-footer-col-3-2">
+						<ul class="ibm-link-list">
+							<li><a class="ibm-delicious-link" href="#">Delicious</a></li>
+							<li><a class="ibm-digg-link" href="#">Digg</a></li>
+							<!--<li><a class="ibm-stumbleupon" href="#">StumbleUpon</a></li>-->
+						</ul>
+                    </div>
+                    <div class="dw-footer-col-3-3">
+						<ul class="ibm-link-list">
+							<li><a class="ibm-email-link" href="#">发送此页面</a></li>
+						</ul>
+                    </div>
+                    <div class="dw-footer-close">
+						<ul>
+							<li><div class="dw-footer-close-share"><a href="#"><img src="//dw1.s81c.com/i/c.gif" alt="关闭 [x]" width="20" height="10"/></a></div></li>
+						</ul>
+                    </div>
+                </div>
+                <!-- Follow developerWorks -->
+                <div class="dw-footer-columns">
+                    <div class="dw-footer-col-1-1">
+                    	<h2>分享此页面：</h2>
+						<ul class="ibm-link-list">
+							<li><a id="dw-foot-1-0" class="ibm-twitter-link" href="http://www.twitter.com/dwchina">Twitter</a></li>
+						</ul>
+                    </div>
+                    <div class="dw-footer-close">
+						<ul>
+							<li><div class="dw-footer-close-follow-cn"><a href="#"><img src="//dw1.s81c.com/i/c.gif" alt="关闭 [x]" width="20" height="10"/></a></div></li>
+						</ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="ibm-footer-module-dw">
+	<div class="dw-footer-columns">
+		<div class="dw-footer-col-6-1">
+			<ul>
+				<!--<li><a href="http://www.ibm.com/developerworks/aboutdw/">About</a></li>-->
+				<li><a href="https://www.ibm.com/developerworks/secure/feedback.jsp?domain=dwchina">帮助</a></li>
+				<li><a href="http://www.ibm.com/developerworks/cn/author/">联系编辑</a></li>
+				<li><a href="https://www.ibm.com/developerworks/secure/myideas2.jsp?domain=dwchina&start=true">提交内容</a></li>
+				<li><a href="http://www.ibm.com/developerworks/cn/sitemap/">网站导航</a></li>
+			</ul>
+		</div>
+		<div class="dw-footer-col-6-2">
+			<ul>
+				<li><a href="http://www.ibm.com/developerworks/cn/rss/">订阅源</a></li>
+				<li><a href="http://www.ibm.com/vrm/newsletter/10104?S_TACT=105AGX52&S_CMP=dwcntop">在线浏览每周时事通讯</a></li>
+			</ul>
+		</div>
+		<div class="dw-footer-col-6-3">
+			<ul>
+				<li><a href="https://www.ibm.com/developerworks/community/report?lang=zh">报告滥用</a></li>
+				<li><a href="https://www.ibm.com/developerworks/community/terms?lang=zh">使用条款</a></li>
+				<li><a href="http://www.ibm.com/privacy/cn/zh/">隐私条约</a></li>
+				<li><a href="http://www.ibm.com/ibm/accessibility/cn/">浏览辅助</a></li>
+			</ul>
+		</div>
+		<div class="dw-footer-col-6-4-cn">
+			<ul>
+				<li><a href="http://www-900.ibm.com/cn/ai/">IBM 教育学院教育培养计划</a></li>
+				<li><a href="http://www.ibm.com/partnerworld/isv/">ISV 资源 (英语)</a></li>
+			</ul>
+		</div>
+		<div class="dw-footer-col-6-5">
+		</div>
+		<div class="dw-footer-col-6-6">
+		</div>
+	</div>
+	<!-- Language selector no-script -->
+	<noscript>
+	<div id="dw-footer-selectlang">
+		<h2><a name="SELECTLANG">选择语言：</a></h2>
+		<ul>
+			<li><a href="http://www.ibm.com/developerworks/">English</a></li>
+			<li><a href="http://www.ibm.com/developerworks/cn/">中文</a></li>
+			<li><a href="http://www.ibm.com/developerworks/jp/">日本語</a></li>
+			<li><a href="http://www.ibm.com/developerworks/kr/">한국어</a></li>
+			<li><a href="http://www.ibm.com/developerworks/ru/">Русский</a></li>
+			<li><a href="http://www.ibm.com/developerworks/br/">Português (Brasil)</a></li>
+			<li><a href="http://www.ibm.com/developerworks/ssa/">Español</a></li>
+			<li><a href="http://www.ibm.com/developerworks/vn/">Việt</a></li>
+		</ul>
+	</div>
+	</noscript>
+</div><!-- FOOTER_END -->
+
+ <!-- END_IBM-TOP -->
+</div>
+ 
+ <!-- SCRIPTS_INCLUDE_BEGIN -->
+<!-- JQuery start -->
+<script type="text/javascript" language="JavaScript" src="//dw1.s81c.com/developerworks/js/jquery/cluetip98/jquery.hoverIntent.minified.js"></script>
+<script type="text/javascript" language="JavaScript" src="//dw1.s81c.com/developerworks/js/jquery/cluetip98/jquery.cluetip.js"></script>
+<script type="text/javascript" language="JavaScript" src="//dw1.s81c.com/developerworks/js/jquery/tagging/ui.core-1.7.1.js"></script>
+<script type="text/javascript" language="JavaScript" src="//dw1.s81c.com/developerworks/js/jquery/tagging/ui.slider-1.7.1.js"></script>
+
+<!-- xM Masthead/Footer -->
+<script src="//dw1.s81c.com/developerworks/js/dw-mf/jquery.tools.min.js" type="text/javascript">//</script>
+<script src="//dw1.s81c.com/developerworks/js/dw-mf/jquery.jscroll.js" type="text/javascript">//</script>
+<script src="//dw1.s81c.com/developerworks/js/dw-mf/dw_v16.js" type="text/javascript">//</script>
+<script src="//dw1.s81c.com/developerworks/js/dw-mf/flash-detect.js" type="text/javascript">//</script>
+<script src="//dw1.s81c.com/developerworks/js/dw-mf/dwsi.js" type="text/javascript">//</script>
+<script type="text/javascript" language="JavaScript" src="//dw1.s81c.com/developerworks/js/dw-mf/dwjquerytags.js"></script>
+<script type="text/javascript" language="JavaScript" src="//dw1.s81c.com/developerworks/js/dw-mf/showcomments.js">//</script>
+<script language="JavaScript" type="text/javascript">
+	// <![CDATA[
+ jQuery('threadShow').showComments('95%',5,'nCmts','icomments');
+// ]]>
+</script>
+<script type="text/javascript" language="JavaScript">
+	jQuery.noConflict();     
+	// Put all your code in your document ready area
+	jQuery(document).ready(function(jQuery) {
+	// Do jQuery stuff using jQuery 
+	jQuery('a.dwauthor').cluetip({
+	local: true,
+	showTitle: false,
+	positionBy: 'bottomTop',
+	sticky: true,	
+	mouseOutClose: true,
+	closeText: '<img src="//dw1.s81c.com/developerworks/js/jquery/cluetip98/i/x.gif" alt="Close" />',
+	arrows: false,
+	dropShadow: true,
+	cluetipClass: 'dwbasic'
+	});   	
+	//tagging
+	login="false";
+	userid="";
+	whichTags = "init";
+	pCont = "";
+	mCont = "";
+	signInMCont = "";
+	accessCont = "";
+	pValue = 0;
+	mValue = 0;
+	
+	rBHash = null;
+	rBHash = new Object();
+	rBHash['viperLang'] = 'zh';
+	rBHash['urlLang'] = 'cn';
+	rBHash['tagThisWinTitle'] = '添加标签';
+	rBHash['pTags1'] = '热门标签';		
+	rBHash['pTags2'] = '热门标签结束';
+	rBHash['mTags1'] = '我的标签';
+	rBHash['mTags2'] = '我的标签结束';
+	rBHash['alt1'] = '正在加载内容';
+	rBHash['noATags'] = '没有可用的标签';
+	rBHash['signIn1'] = '请';
+	rBHash['signIn2'] = '登录';
+	rBHash['signIn3'] = '以访问';
+	rBHash['signIn4'] = '我的标签';
+	rBHash['signIn5'] = '要访问我的标签，请';
+	rBHash['signIn6'] = '登录';
+	rBHash['signIn7'] = '查看热门标签';
+	rBHash['dnameSuffix'] = '';
+
+	zoneHash = new Object();
+	zoneHash['aix'] = 'AIX and UNIX';
+	zoneHash['ibmi'] = 'IBM i zone';
+	zoneHash['data'] = 'Information Management';
+	zoneHash['lotus'] = 'Lotus';
+	zoneHash['rational'] = 'Rational';
+	//zoneHash['tivoli'] = 'Tivoli zone';
+	zoneHash['websphere'] = 'WebSphere';
+	zoneHash['architecture'] = 'Technical library';
+	//zoneHash['autonomic'] = 'Technical library';
+	zoneHash['java'] = 'Java technology';
+	zoneHash['cloud'] = 'Cloud computing';
+	//zoneHash['industry'] = 'Technical library';
+	zoneHash['library'] = '文档库';
+	zoneHash['linux'] = 'Linux';
+	zoneHash['opensource'] = 'Open source';
+	//zoneHash['power'] = 'Technical library';
+	zoneHash['webservices'] = 'SOA and web services';
+	zoneHash['web'] = 'Web development';
+	zoneHash['xml'] = 'XML';
+	//zoneHash['wireless'] = 'Technical library';
+	jQuery.checkRB();
+	jQuery.getPopularTags("/developerworks/dwtags/dwjquerytabtags?lang=" + rBHash['viperLang'] + "&base=" + jQuery.getNormalizedZoneUrl(location.href));
+	jQuery.getUserTags();
+	if(jQuery.isTutorial(location.href) == "true") {
+	jQuery.getTagsForContent("/developerworks/tagging/UseCaseServlet?lang=" + rBHash['viperLang'] + "&format=maverick&cType=tutorials&use_case=geturltags&action=gettags&url=" + jQuery.normalizeUrl(location.href));
+	}
+	else {
+	jQuery.getTagsForContent("/developerworks/tagging/UseCaseServlet?lang=" + rBHash['viperLang'] + "&format=maverick&cType=articles&use_case=geturltags&action=gettags&url=" + jQuery.normalizeUrl(location.href));
+	
+	}
+	// si
+	initSI();
+	});
+</script>
+<!-- JQuery end -->
+<!-- Overlay js -->
+<script language="JavaScript" src="//dw1.s81c.com/common/js/overlay.js" type="text/javascript"></script><!-- BEGIN: Use this section to set page specific variables for the Unica Page Tag -->
+<script language="JavaScript">var NTPT_PGEXTRA="ibmSkillLevel=1&ibmAdoptPhase=667&ibmRole=710";</script>
+<!--END --><!-- SCRIPTS_INCLUDE_END -->
+
+<div id="ibm-metrics">
+<script src="//dw1.s81c.com/common/stats/stats.js" type="text/javascript">//</script>
+</div>
+
+</body>
+</html>

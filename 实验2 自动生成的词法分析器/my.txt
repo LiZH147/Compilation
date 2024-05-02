@@ -1,0 +1,17 @@
+{  /* An example */
+float x = 1.123e+2;
+int b = 100; 
+int b = 1E+2;
+int i,j; float x; float[100] a;
+while ( true) {
+do i = i + 1; while ( a[i] < x);
+if ( i >= j ) break;
+x = a[i];
+}
+}
+float x = 1.123;
+float x = 1.123E+2;
+float x = 1.123e+2;
+int b = 100; 
+int b = 1E+2; 
+int b = 1e+2; 

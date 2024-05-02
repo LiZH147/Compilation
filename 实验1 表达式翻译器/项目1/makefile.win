@@ -1,0 +1,37 @@
+# Project: 项目1
+# Makefile created by Red Panda C++ 1.4
+
+CPP      = g++.exe
+CC       = gcc.exe
+WINDRES  = windres.exe
+RES      = 项目1_private.res
+OBJ      = main.o main2.o $(RES)
+LINKOBJ  = main.o main2.o $(RES)
+CLEANOBJ  =  main.o main2.o 项目1_private.res 项目1.exe
+LIBS     = 
+INCS     =  
+CXXINCS  =  
+BIN      = 项目1.exe
+CXXFLAGS = $(CXXINCS)  -g3 -pipe -Wall -Wextra -D__DEBUG__
+CFLAGS   = $(INCS)  -g3 -pipe -Wall -Wextra -D__DEBUG__
+RM       = del /q /f
+
+.PHONY: all all-before all-after clean clean-custom
+
+all: all-before $(BIN) all-after
+
+clean: clean-custom
+	${RM} $(CLEANOBJ) > NUL 2>&1
+
+$(BIN): $(OBJ)
+	$(CPP) $(LINKOBJ) -o $(BIN) $(LIBS)
+
+main.o: main.cpp
+	$(CPP) -c "D:/李梓涵/2024春季学期/编译原理/实验题目/实验1 表达式翻译器/项目1/main.cpp" -o main.o $(CXXFLAGS)  -finput-charset=UTF-8 -fexec-charset=gbk
+
+main2.o: main2.cpp
+	$(CPP) -c "D:/李梓涵/2024春季学期/编译原理/实验题目/实验1 表达式翻译器/项目1/main2.cpp" -o main2.o $(CXXFLAGS) 
+
+项目1_private.res: 项目1_private.rc 
+	$(WINDRES) -i 项目1_private.rc --input-format=rc -o 项目1_private.res -O coff 
+
